@@ -1,0 +1,164 @@
+# libs.versions.toml — Gradle Version Catalog for litert-boilerplate
+#
+# All dependency versions are pinned here and referenced from module build
+# files via the generated `libs` accessor. This eliminates version skew
+# across modules and makes upgrades a single-line change.
+#
+# Verified against published artifacts on Google Maven and Maven Central
+# as of April 2026.
+#
+# Part of litert-android-boilerplate by Necessity Labs
+# Created: 2025-05-02
+
+# ─────────────────────────────────────────────────────────────────────────────
+# [versions]
+# ─────────────────────────────────────────────────────────────────────────────
+[versions]
+
+# Android Gradle Plugin
+agp = "8.7.3"
+
+# Kotlin — also drives the Compose Compiler version (bundled since 2.0).
+kotlin = "2.0.21"
+
+# KSP — must match the Kotlin version prefix exactly.
+# Format: <kotlin-version>-<ksp-incremental-version>
+ksp = "2.0.21-1.0.28"
+
+# ── Android SDK ──────────────────────────────────────────────────────────────
+compileSdk = "35"
+minSdk     = "26"
+targetSdk  = "35"
+
+# ── Jetpack Compose ──────────────────────────────────────────────────────────
+# The BOM pins all androidx.compose.* artifact versions to a tested set.
+# Material3 and other Compose artifacts are resolved through the BOM —
+# no individual version entry is needed for them.
+composeBom = "2024.12.01"
+
+# ── Hilt ─────────────────────────────────────────────────────────────────────
+hilt = "2.53.1"
+
+# ── Coroutines ───────────────────────────────────────────────────────────────
+coroutines = "1.9.0"
+
+# ── Lifecycle ────────────────────────────────────────────────────────────────
+lifecycle = "2.8.7"
+
+# ── Navigation Compose ───────────────────────────────────────────────────────
+navigationCompose = "2.8.5"
+
+# ── LiteRT (Google AI Edge — 1.x Interpreter track) ─────────────────────────
+# The 1.x Interpreter API is the only documented path for using the QNN
+# delegate. The 2.x CompiledModel API does not yet support QNN delegation.
+litert        = "1.4.0"
+litert-gpu    = "1.2.0"
+litertSupport = "1.2.0"
+
+# ── LiteRT-LM (GenAI / LLM) ──────────────────────────────────────────────────
+# Published to Google Maven as com.google.ai.edge.litertlm:litertlm-android.
+# Pinned to latest.release at catalog authoring time; update via
+# `./gradlew dependencyUpdates` before each release.
+literlm = "latest.release"
+
+# ── QNN (Qualcomm Neural Networks) ───────────────────────────────────────────
+# com.qualcomm.qti artifacts are published to Maven Central by Qualcomm.
+# Version 2.44.0 targets SM8550 (Snapdragon 8 Gen 2) and pairs with
+# LiteRT 1.4.0 via the qnn-litert-delegate bridge.
+qnn = "2.44.0"
+
+# ── Testing ──────────────────────────────────────────────────────────────────
+junit5    = "5.11.4"
+mockk     = "1.13.14"
+turbine   = "1.2.0"
+# Android JUnit5 runner — bridges JUnit5 on the Android test runner
+androidJunit5 = "1.10.2"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# [libraries]
+# ─────────────────────────────────────────────────────────────────────────────
+[libraries]
+
+# ── Jetpack Compose BOM ───────────────────────────────────────────────────────
+# Import as a platform() dependency so all compose.* versions are aligned.
+compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+
+# Compose UI essentials — versions resolved by BOM.
+compose-ui                   = { group = "androidx.compose.ui",       name = "ui" }
+compose-ui-graphics          = { group = "androidx.compose.ui",       name = "ui-graphics" }
+compose-ui-tooling           = { group = "androidx.compose.ui",       name = "ui-tooling" }
+compose-ui-tooling-preview   = { group = "androidx.compose.ui",       name = "ui-tooling-preview" }
+compose-ui-test-manifest     = { group = "androidx.compose.ui",       name = "ui-test-manifest" }
+compose-ui-test-junit4       = { group = "androidx.compose.ui",       name = "ui-test-junit4" }
+compose-material3            = { group = "androidx.compose.material3", name = "material3" }
+compose-activity             = { group = "androidx.activity",          name = "activity-compose", version = "1.9.3" }
+
+# ── Hilt ─────────────────────────────────────────────────────────────────────
+hilt-android           = { group = "com.google.dagger", name = "hilt-android",           version.ref = "hilt" }
+hilt-android-compiler  = { group = "com.google.dagger", name = "hilt-android-compiler",  version.ref = "hilt" }
+hilt-navigation-compose = { group = "androidx.hilt",   name = "hilt-navigation-compose", version = "1.2.0" }
+
+# ── Lifecycle ────────────────────────────────────────────────────────────────
+lifecycle-runtime-ktx      = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx",      version.ref = "lifecycle" }
+lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+lifecycle-runtime-compose  = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose",   version.ref = "lifecycle" }
+
+# ── Navigation ───────────────────────────────────────────────────────────────
+navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+
+# ── Coroutines ───────────────────────────────────────────────────────────────
+coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+coroutines-core    = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core",    version.ref = "coroutines" }
+coroutines-test    = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test",    version.ref = "coroutines" }
+
+# ── LiteRT — classical ML (1.x Interpreter API) ──────────────────────────────
+litert-core    = { group = "com.google.ai.edge.litert", name = "litert",         version.ref = "litert" }
+litert-gpu     = { group = "com.google.ai.edge.litert", name = "litert-gpu",     version.ref = "litert-gpu" }
+litert-support = { group = "com.google.ai.edge.litert", name = "litert-support", version.ref = "litertSupport" }
+
+# ── LiteRT-LM — GenAI / LLM ──────────────────────────────────────────────────
+litert-lm = { group = "com.google.ai.edge.litertlm", name = "litertlm-android", version.ref = "literlm" }
+
+# ── QNN delegate + runtime ───────────────────────────────────────────────────
+# qnn-litert-delegate bridges the QNN SDK to the LiteRT Interpreter API.
+# qnn-runtime contains the shared libraries (.so) for Snapdragon NPU execution.
+qnn-litert-delegate = { group = "com.qualcomm.qti", name = "qnn-litert-delegate", version.ref = "qnn" }
+qnn-runtime         = { group = "com.qualcomm.qti", name = "qnn-runtime",         version.ref = "qnn" }
+
+# ── JUnit 5 ──────────────────────────────────────────────────────────────────
+junit5-api     = { group = "org.junit.jupiter", name = "junit-jupiter-api",    version.ref = "junit5" }
+junit5-engine  = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit5" }
+junit5-params  = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit5" }
+
+# Android JUnit5 runner — required because the standard Android test runner
+# only supports JUnit4 out of the box. The runner adapts JUnit5 tests.
+android-junit5-runner = { group = "de.mannodermaus.junit5", name = "android-test-core", version.ref = "androidJunit5" }
+
+# ── Mockk ────────────────────────────────────────────────────────────────────
+mockk         = { group = "io.mockk", name = "mockk",          version.ref = "mockk" }
+mockk-android = { group = "io.mockk", name = "mockk-android",  version.ref = "mockk" }
+
+# ── Turbine (Flow testing) ───────────────────────────────────────────────────
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# [plugins]
+# ─────────────────────────────────────────────────────────────────────────────
+[plugins]
+
+# Android Application / Library plugin — provided by Google.
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library     = { id = "com.android.library",     version.ref = "agp" }
+
+# Kotlin Android plugin.
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+
+# Compose Compiler Gradle plugin — bundled with Kotlin 2.0+.
+# Replaces the legacy composeOptions.kotlinCompilerExtensionVersion block.
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
+# Hilt Gradle plugin — generates the component wiring.
+hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+
+# KSP — Kotlin Symbol Processing, replaces kapt for Hilt annotation processing.
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

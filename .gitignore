@@ -1,0 +1,179 @@
+# =============================================================================
+# litert-android-boilerplate — .gitignore
+# =============================================================================
+
+# =============================================================================
+# Build Artifacts
+# =============================================================================
+build/
+*/build/
+.gradle/
+*/.gradle/
+local.properties
+*.hprof
+
+# Gradle wrapper jar (keep gradlew and gradlew.bat, ignore the jar itself)
+!gradle/wrapper/gradle-wrapper.jar
+
+# Generated source files
+**/generated/
+**/kapt/
+**/ksp/
+
+# =============================================================================
+# Android / IDE Files
+# =============================================================================
+.idea/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Android Studio navigation editor files
+.navigation/
+
+# User-specific Android Studio settings
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+.idea/vcs.xml
+.idea/jsLibraryMappings.xml
+.idea/datasources.xml
+.idea/dataSources.ids
+.idea/sqlDataSources.xml
+.idea/dynamic.xml
+.idea/uiDesigner.xml
+.idea/gradle.xml
+
+# =============================================================================
+# Model Files — Do Not Commit Model Weights
+# =============================================================================
+
+# LiteRT / TFLite models
+*.tflite
+
+# LiteRT-LM models
+*.litertlm
+
+# MediaPipe task bundles
+*.task
+
+# ONNX models
+*.onnx
+
+# GGUF models (llama.cpp format)
+*.gguf
+
+# PyTorch / safetensors weights
+*.bin
+*.safetensors
+*.pt
+*.pth
+
+# TensorFlow checkpoints and saved models
+*.ckpt
+*.ckpt.index
+*.ckpt.data-00000-of-00001
+saved_model/
+
+# CoreML models (in case of cross-platform work)
+*.mlmodel
+*.mlpackage
+
+# QNN context binary cache (device-compiled artifacts)
+*.bin.qnn
+*_qnn.bin
+
+# =============================================================================
+# QNN Native Libraries — Developer Must Provide These
+# See docs/QNN-SETUP.md for acquisition instructions
+# =============================================================================
+libs/qnn/arm64-v8a/*.so
+libs/qnn/*/
+
+# Keep the directory structure
+!libs/qnn/arm64-v8a/.gitkeep
+
+# =============================================================================
+# Secrets and Credentials
+# =============================================================================
+*.keystore
+*.jks
+keystore.properties
+signing.properties
+.env
+.env.*
+google-services.json
+GoogleService-Info.plist
+
+# API keys (should never be in source)
+**/keys.xml
+**/api_keys.xml
+
+# =============================================================================
+# Python / Conversion Tools
+# =============================================================================
+tools/conversion/__pycache__/
+tools/conversion/**/__pycache__/
+tools/conversion/**/*.pyc
+tools/conversion/**/*.pyo
+tools/scripts/__pycache__/
+tools/scripts/**/__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+__pycache__/
+*.egg-info/
+dist/
+*.egg
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+htmlcov/
+
+# =============================================================================
+# macOS
+# =============================================================================
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+
+# =============================================================================
+# Windows
+# =============================================================================
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# =============================================================================
+# Linux
+# =============================================================================
+*~
+.nfs*
+
+# =============================================================================
+# Test Output
+# =============================================================================
+test-results/
+reports/
+jacoco/
+*.exec
+
+# =============================================================================
+# Keep Empty Directories (these .gitkeep files should be committed)
+# =============================================================================
+!libs/qnn/arm64-v8a/.gitkeep
+!app/src/main/assets/models/.gitkeep
