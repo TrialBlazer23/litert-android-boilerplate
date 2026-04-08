@@ -1,0 +1,88 @@
+# litert-android-boilerplate — Cursor Rules
+
+## Stack (Pinned — Do Not Change)
+- Kotlin 2.0.21, AGP 8.7.3, Compose BOM 2024.12.01
+- Min SDK 26, Target/Compile SDK 35
+- LiteRT: com.google.ai.edge.litert:litert:1.4.0
+- LiteRT GPU: com.google.ai.edge.litert:litert-gpu:1.2.0
+- LiteRT-LM: com.google.ai.edge.litertlm:litertlm-android:latest.release
+- QNN: com.qualcomm.qti:qnn-litert-delegate:2.44.0
+- Hilt 2.51.1, Coroutines 1.8.1, Room 2.6.1
+
+## Code Rules
+- No TODO, no placeholder, no stub, no NotImplementedError
+- No file longer than 300 lines — split if approaching limit
+- Every public function has KDoc (what, params, returns, throws)
+- Type hints everywhere — no raw Any, no unsafe casts
+- Error handling on every I/O, delegate init, and inference call
+- No hardcoded strings — use AppConfig or string resources
+
+## Architecture
+- MVVM + Repository + Hilt DI
+- inference/ → classical ML only (InterpreterApi)
+- inference-lm/ → LLM only (LiteRT-LM Engine)
+- app/ → UI, DI wiring, config (replace when forking)
+- Tools → tools/conversion/working/ (proven) or tools/conversion/experimental/ (risky, labeled)
+
+## LiteRT Interpreter API — Correct
+```kotlin
+import com.google.ai.edge.litert.InterpreterApi
+val interpreter = InterpreterApi.create(modelBuffer, options)
+```
+
+## LiteRT Interpreter API — FORBIDDEN
+```kotlin
+import org.tensorflow.lite.Interpreter  // OLD namespace — do not use
+```
+
+## LiteRT-LM API — Correct
+```kotlin
+val config = EngineConfig(modelPath = "/absolute/path.litertlm", backend = ...)
+val engine = Engine(config)
+val conversation = engine.createConversation()
+val flow: Flow<Message> = conversation.sendMessageAsync("prompt")
+```
+
+## LiteRT-LM API — FORBIDDEN
+```kotlin
+Engine.createFromOptions(...)          // does not exist
+EngineConfig.Builder()                 // does not exist
+engine.createSession(...)              // deprecated
+conversation.addQueryChunk(...)        // deprecated
+modelPath = "assets://..."             // not supported by LM engine
+```
+
+## Delegate Priority (enforce in this order)
+1. QNN NPU — Backend.NPU(nativeLibraryDir) or QnnDelegateFactory
+2. GPU — GpuDelegateFactory() / Backend.GPU()
+3. CPU/XNNPACK — always the final fallback
+
+## NNAPI
+- NOT included. Deprecated in Android 15. Do not add.
+
+## QNN .so Files
+- libs/qnn/arm64-v8a/ — not committed to git
+- SM8550 (Snapdragon 8 Gen 2): needs libQnnHtpV73Stub.so, libQnnHtpV73Skel.so
+- Must use useLegacyPackaging = true in packagingOptions
+
+## Model Files
+- .tflite → assets/models/ (< 100 MB) or absolute device path
+- .litertlm → absolute device path ONLY (no assets:// support)
+- *.tflite, *.litertlm, *.onnx, *.gguf → in .gitignore, never commit
+
+## File Globs
+- `inference/src/main/**/*.kt` → inference module source
+- `inference-lm/src/main/**/*.kt` → LM module source
+- `app/src/main/**/*.kt` → app source (replace when forking)
+- `**/*Test.kt` → test files
+- `gradle/libs.versions.toml` → version catalog (all dep versions live here)
+
+## Tests
+- Every public function → unit test in src/test/
+- Every delegate path → unit test with mock
+- Run: ./gradlew :inference:test :inference-lm:test
+
+## Commits
+- Format: type(scope): description
+- Types: feat, fix, test, docs, chore, refactor, perf
+- Scopes: inference, inference-lm, app, tools, ci, deps
