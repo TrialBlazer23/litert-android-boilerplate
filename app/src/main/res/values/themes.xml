@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    themes.xml — XML theme declarations for litert-android-boilerplate.
+
+    The app uses Material3 and Jetpack Compose for all UI. This XML theme exists
+    solely as the android:theme value in AndroidManifest.xml and is only applied
+    to system-level surfaces (splash screen, task switcher, soft keyboard area)
+    before Compose takes over.
+
+    Theme.LiteRt extends Theme.Material3.DayNight.NoActionBar:
+      • NoActionBar — prevents the legacy ActionBar from appearing; Compose
+        handles its own top bars.
+      • DayNight — system respects the device dark/light mode setting, but
+        since the app only defines a dark color scheme the effective appearance
+        is always dark.
+
+    The windowBackground is set to true black (#000000) so there is no white
+    flash during the activity launch window before Compose draws its first frame.
+    This is especially important on OLED displays (S23 Ultra).
+
+    Part of litert-android-boilerplate by Necessity Labs
+    Created: 2025-05-02
+-->
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="Theme.LiteRt" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- True-black window background eliminates the white flash on OLED. -->
+        <item name="android:windowBackground">@android:color/black</item>
+        <!-- Status bar and navigation bar are transparent so Compose can draw
+             edge-to-edge content underneath them. -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <!-- Opt into edge-to-edge rendering (required for Compose edge-to-edge). -->
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+
+</resources>

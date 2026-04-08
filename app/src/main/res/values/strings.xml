@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    strings.xml — Application string resources for litert-android-boilerplate.
+
+    All user-visible text is centralised here for easy localisation.
+    Add translated variants in res/values-<locale>/strings.xml.
+
+    Part of litert-android-boilerplate by Necessity Labs
+    Created: 2025-05-02
+-->
+<resources>
+    <!-- Application name shown in the launcher and task switcher. -->
+    <string name="app_name">LiteRT Boilerplate</string>
+
+    <!-- ── Bottom navigation tabs ──────────────────────────────────────────── -->
+    <string name="tab_inference">Inference</string>
+    <string name="tab_chat">Chat</string>
+
+    <!-- ── InferenceScreen ─────────────────────────────────────────────────── -->
+    <string name="inference_title">Classical ML Inference</string>
+    <string name="inference_subtitle">
+        Load a TFLite / LiteRT model and run a single inference pass.
+        Benchmark results include the delegate selected, load time, and inference latency.
+    </string>
+    <string name="btn_load_model">Load Model</string>
+    <string name="btn_run_inference">Run Inference</string>
+
+    <!-- ── ChatScreen ──────────────────────────────────────────────────────── -->
+    <!-- Engine status bar labels. %1$s = backend name, %1$d = load time in ms. -->
+    <string name="chat_engine_idle">Engine not loaded</string>
+    <string name="chat_engine_loading">Loading on %1$s…</string>
+    <string name="chat_engine_ready">Ready in %1$d ms</string>
+    <string name="chat_engine_error">Engine error — tap to retry</string>
+
+    <!-- Text field placeholder text. -->
+    <string name="chat_input_hint">Type a message…</string>
+    <string name="chat_input_hint_loading">Loading model…</string>
+
+    <!-- Send button content description (for accessibility). -->
+    <string name="btn_send">Send</string>
+
+    <!-- ── Generic labels ───────────────────────────────────────────────────── -->
+    <string name="label_benchmark_results">Benchmark Results</string>
+    <string name="label_backend">Backend</string>
+    <string name="label_load_time_ms">Load time</string>
+    <string name="label_inference_time_ms">Inference time</string>
+    <string name="label_memory_kb">Memory usage</string>
+    <string name="label_tokens_per_second">Tokens / second</string>
+</resources>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    AndroidManifest.xml — App manifest for litert-android-boilerplate.
+
+    Key declarations:
+      • LiteRtApp is the Application class (Hilt @HiltAndroidApp).
+      • MainActivity is the launcher entry point.
+      • libvndksupport.so and libOpenCL.so are listed as optional native libraries
+        required by the LiteRT-LM GPU backend (Backend.GPU()).
+      • READ_EXTERNAL_STORAGE / READ_MEDIA_* allow the app to load .litertlm
+        model files from shared storage (/storage/emulated/0/...).
+
+    Part of litert-android-boilerplate by Necessity Labs
+    Created: 2025-05-02
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- ── Storage permissions (model loading from shared storage) ──────────
+         READ_EXTERNAL_STORAGE covers API 21–32 (Android 5–12L).
+         READ_MEDIA_* covers API 33+ (Android 13+).
+         Neither permission is required if models are in app-private storage
+         (/data/data/<pkg>/files/) — remove these if you use that path instead.
+    -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"
+        android:minSdkVersion="33" />
+
+    <application
+        android:name=".LiteRtApp"
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.LiteRt"
+        android:allowBackup="false"
+        android:hardwareAccelerated="true">
+
+        <!-- ── GPU backend native libraries ──────────────────────────────────
+             Both libraries must be declared with required="false" so the app
+             installs normally on devices where they are absent (CPU-only fallback).
+             Without these declarations on Android 12+ (API 31+), the system will
+             refuse to load libOpenCL.so even if it is present on the device.
+             See: LiteRT-LM GPU backend docs.
+        -->
+        <uses-native-library
+            android:name="libvndksupport.so"
+            android:required="false" />
+        <uses-native-library
+            android:name="libOpenCL.so"
+            android:required="false" />
+
+        <!-- ── Main launcher activity ─────────────────────────────────────── -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>
