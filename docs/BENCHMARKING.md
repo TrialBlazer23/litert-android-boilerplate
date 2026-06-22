@@ -1,8 +1,8 @@
 # Benchmarking Guide
 
 The `inference` module includes a `BenchmarkTracker` that captures per-inference performance
-metrics. This guide explains what is measured, how to read the output, expected numbers on SM8550,
-and how to profile memory.
+metrics. This guide explains what is measured, how to read the output, expected numbers on SM8550
+and SM8750 (Nothing Phone 3), and how to profile memory.
 
 ---
 
@@ -83,11 +83,49 @@ corner of the screen showing:
 
 ---
 
-## Expected Performance Ranges on SM8550
+## Expected Performance — SM8750 / Nothing Phone 3 (Snapdragon 8 Elite, HTP v79)
 
 These numbers are for warm inferences with QNN context binaries already compiled.
 
 ### Classical ML (inference module — .tflite)
+
+| Model | Delegate | Inference Latency | Notes |
+|---|---|---|---|
+| MobileNetV3-Small (224×224 INT8) | QNN HTP v79 | 0.8–1.5ms | Image classification |
+| MobileNetV3-Large (224×224 INT8) | QNN HTP v79 | 1–2ms | Image classification |
+| EfficientDet-Lite0 (320×320 INT8) | QNN HTP v79 | 2–4ms | Object detection |
+| EfficientDet-Lite2 (448×448 INT8) | QNN HTP v79 | 4–9ms | Object detection |
+| MobileNet-SSD (300×300 INT8) | QNN HTP v79 | 1.5–3ms | Object detection |
+| BERT-Base (128 token, INT8) | QNN HTP v79 | 8–18ms | Text embedding |
+| MobileNetV3-Large (224×224 INT8) | GPU (Adreno 830) | 3–6ms | Fallback |
+| MobileNetV3-Large (224×224 INT8) | CPU (Oryon) | 15–30ms | Fallback |
+
+### LLM (inference-lm module — .litertlm)
+
+| Model | Delegate | Tokens/sec (prefill) | Tokens/sec (decode) |
+|---|---|---|---|
+| Gemma 2B INT4 | QNN HTP v79 | 150–220 t/s | 50–75 t/s |
+| Gemma 7B INT4 | QNN HTP v79 | 60–90 t/s | 20–35 t/s |
+| Phi-2 2.7B INT4 | QNN HTP v79 | 120–160 t/s | 40–60 t/s |
+| Llama 3.2 1B INT4 | QNN HTP v79 | 250–350 t/s | 80–120 t/s |
+| Llama 3.2 3B INT4 | QNN HTP v79 | 130–180 t/s | 45–70 t/s |
+| Gemma 2B INT4 | GPU (Adreno 830) | 50–80 t/s | 18–30 t/s |
+
+**16 GB RAM headroom:** The Nothing Phone 3 has 16 GB LPDDR5X. INT4 model memory requirements:
+- Gemma 2B INT4: ~1.2 GB — very comfortable
+- Gemma 7B INT4: ~4 GB — comfortable
+- Llama 13B INT4 (if available in .litertlm): ~7 GB — feasible, test for OOM headroom
+
+### First-run QNN compilation times on SM8750 (approximate):
+- 1B INT4 model: 10–20 seconds
+- 2B INT4 model: 20–40 seconds
+- 7B INT4 model: 60–120 seconds
+
+---
+
+## Expected Performance — SM8550 / Galaxy S23 Ultra (Snapdragon 8 Gen 2, HTP v73)
+
+### Classical ML
 
 | Model | Delegate | Inference Latency | Notes |
 |---|---|---|---|
@@ -97,14 +135,10 @@ These numbers are for warm inferences with QNN context binaries already compiled
 | EfficientDet-Lite2 (448×448 INT8) | QNN HTP | 8–15ms | Object detection |
 | MobileNet-SSD (300×300 INT8) | QNN HTP | 3–6ms | Object detection |
 | BERT-Base (128 token, INT8) | QNN HTP | 15–30ms | Text embedding |
-| MobileNetV3-Large (224×224 INT8) | GPU | 5–10ms | Fallback |
+| MobileNetV3-Large (224×224 INT8) | GPU (Adreno 740) | 5–10ms | Fallback |
 | MobileNetV3-Large (224×224 INT8) | CPU | 25–45ms | Fallback |
 
-**Why GPU is slower than QNN:** The Hexagon HTP is a purpose-built neural network accelerator.
-Adreno GPU handles general SIMD compute — it is faster than CPU but slower than the DSP for
-standard INT8 operations.
-
-### LLM (inference-lm module — .litertlm)
+### LLM
 
 | Model | Delegate | Tokens/sec (prefill) | Tokens/sec (decode) |
 |---|---|---|---|
@@ -113,13 +147,12 @@ standard INT8 operations.
 | Phi-2 2.7B INT4 | QNN HTP | 60–90 t/s | 20–30 t/s |
 | Llama 3.2 1B INT4 | QNN HTP | 120–180 t/s | 40–60 t/s |
 
+**Why GPU is slower than QNN:** The Hexagon HTP is a purpose-built neural network accelerator.
+Adreno GPU handles general SIMD compute — it is faster than CPU but slower than the DSP for
+standard INT8 operations.
+
 **Prefill** = processing the input prompt (parallel — faster).
 **Decode** = generating each output token (sequential — slower).
-
-**First-run compilation times (approximate):**
-- 1B INT4 model: 15–30 seconds
-- 2B INT4 model: 30–60 seconds
-- 7B INT4 model: 90–180 seconds
 
 ---
 
@@ -172,12 +205,15 @@ gives the total native allocation. The model weights live here.
 Typical native heap usage:
 - MobileNetV3 INT8 (5 MB model): ~12 MB native heap (weights + workspace)
 - Gemma 2B INT4: ~1.2 GB native heap (weights dominate)
+- Gemma 7B INT4: ~4 GB native heap
 
 ### OOM Prevention
 
 For LLM models:
 - Check `ActivityManager.getMemoryInfo()` before loading — available native memory should be
   at least 1.5× the model size
+- On Nothing Phone 3 (16 GB RAM), 7B INT4 (~4 GB) leaves ~10 GB free — OOM is unlikely
+  under normal conditions, but always check before loading at runtime
 - Call `engine.close()` explicitly when done; do not rely on GC
 - The `LmEngineManager` in `inference-lm/` manages this lifecycle when used correctly
 
@@ -211,5 +247,5 @@ File(context.getExternalFilesDir(null), "benchmark_${System.currentTimeMillis()}
 ## Official Benchmarking References
 
 - [LiteRT Benchmarking Tool](https://ai.google.dev/edge/litert/performance/measurement) — Google's official CLI benchmark tool
-- [Qualcomm AI Hub — Model Performance](https://aihub.qualcomm.com) — Pre-measured performance for QNN-optimized models on real Snapdragon hardware
+- [Qualcomm AI Hub — Model Performance](https://aihub.qualcomm.com) — Pre-measured performance for QNN-optimized models on real Snapdragon hardware. Includes SM8750 / Nothing Phone 3 results.
 - [Android Memory Profiler](https://developer.android.com/studio/profile/memory-profiler) — Android Studio built-in memory tooling

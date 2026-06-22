@@ -103,10 +103,29 @@ Use `.litertlm` for:
 
 As of April 2026, the following models are available in `.litertlm` format:
 - **Gemma 2B** (Google DeepMind) — general purpose, well-supported
-- **Gemma 7B** (requires high-end device; 4–6 GB RAM for INT4)
+- **Gemma 7B** (INT4 ~4 GB — comfortable on Nothing Phone 3 with 16 GB RAM)
 - **Phi-2 2.7B** (Microsoft, via litert-community)
 - **Llama 3.2 1B and 3B** (Meta, via litert-community)
 - **Falcon 1B** (TII, via litert-community)
+
+**Nothing Phone 3 (16 GB RAM) model sizing:**
+The 16 GB LPDDR5X RAM opens up larger models than are feasible on 8 GB devices:
+
+| Model | INT4 Size | NP3 Feasibility |
+|---|---|---|
+| Gemma 2B INT4 | ~1.2 GB | Excellent — leaves 14+ GB free |
+| Phi-2 2.7B INT4 | ~1.5 GB | Excellent |
+| Llama 3.2 3B INT4 | ~1.8 GB | Excellent |
+| Gemma 7B INT4 | ~4 GB | Comfortable — leaves ~10 GB free |
+| Llama 13B INT4 (if available) | ~7 GB | Feasible — verify with `ActivityManager.getMemoryInfo()` before loading |
+
+Check available memory before loading any model larger than 4 GB:
+```kotlin
+val memInfo = ActivityManager.MemoryInfo()
+activityManager.getMemoryInfo(memInfo)
+val availableGb = memInfo.availMem / (1024.0 * 1024 * 1024)
+check(availableGb > modelSizeGb * 1.5) { "Insufficient memory for model" }
+```
 
 ### Where to Get .litertlm Models
 
@@ -202,6 +221,38 @@ for the MediaPipe path.
 
 ---
 
+## Image Generation — Current Status and Roadmap
+
+Image generation (diffusion models) is **not implemented** in this boilerplate's current
+architecture. The `inference/` module can run individual `.tflite` models but does not
+contain the multi-stage pipeline, scheduler, or image output pipeline required for generation.
+
+The Nothing Phone 3 (SM8750, Adreno 830, 16 GB RAM) is capable of on-device image generation:
+- Stable Diffusion 1.5 quantized: feasible on GPU delegate (Adreno 830 is well-suited)
+- SDXL-Turbo or LCM (Latent Consistency Model): 1–4 step models are practical on-device
+- ControlNet + LCM: feasible with 16 GB RAM
+
+**What a future `inference-image/` module would require:**
+
+1. **Multi-model pipeline** — Text encoder (CLIP), UNet (denoiser), VAE decoder, each as a
+   separate `.tflite` file. Qualcomm AI Hub publishes these as pre-quantized Snapdragon-optimized
+   files for SD 1.5 and SDXL-Turbo at https://aihub.qualcomm.com.
+
+2. **Denoising scheduler** — DDIM, PNDM, or LCM scheduler in Kotlin. This is pure math
+   (no inference), but it must be implemented correctly (timestep scaling, noise prediction).
+
+3. **Image output pipeline** — Convert the VAE output float tensor to a `Bitmap` for display.
+
+4. **GPU delegate tuning** — Image generation is compute-heavy and benefits from
+   `gpuPrecisionLoss = true` (FP16 on Adreno 830 gives ~2× throughput vs FP32).
+
+**Quick path for image generation today:**
+Use [ONNX Runtime Mobile](https://onnxruntime.ai/docs/execution-providers/XNNPACK-ExecutionProvider.html)
+with Stable Diffusion ONNX models. This is a separate runtime from LiteRT and not part of this
+boilerplate, but it has pre-built Android examples.
+
+---
+
 ## Which Format for Which Use Case
 
 | Task | Format | Module | Notes |
@@ -216,6 +267,7 @@ for the MediaPipe path.
 | Summarization | `.litertlm` | `inference-lm/` | Gemma, Phi |
 | Code completion | `.litertlm` | `inference-lm/` | Code Gemma |
 | Audio classification | `.tflite` | `inference/` | YAMNet, AudioSet |
+| Image generation | `.tflite` (multi-model) | `inference-image/` (not yet built) | Requires diffusion pipeline |
 | Custom model | `.tflite` | `inference/` | Any model you train |
 
 ---

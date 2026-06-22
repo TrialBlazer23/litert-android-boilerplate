@@ -66,16 +66,20 @@ data class DelegateCandidate(
  * @property enableGpu         Whether to attempt GPU delegate creation.
  * @property nativeLibraryDir  Absolute path to the app's native library directory.
  *                             Passed to QNN's [setSkelLibraryDir] so it can locate
- *                             [libQnnHtpV73Skel.so].  Obtain via
+ *                             the device-appropriate HTP skel library (e.g.
+ *                             libQnnHtpV73Skel.so on SM8550, libQnnHtpV79Skel.so on
+ *                             SM8750 / Nothing Phone 3). Obtain via
  *                             [android.content.pm.ApplicationInfo.nativeLibraryDir].
- * @property qnnBackendType    QNN backend identifier string.  Must be
- *                             "HTP_BACKEND" for Hexagon NPU on SM8550.
+ * @property qnnBackendType    QNN backend identifier string. "HTP_BACKEND" targets the
+ *                             Hexagon NPU on all supported Snapdragon devices.
  * @property gpuPrecisionLoss  When [true], allows the GPU delegate to use FP16
  *                             internally for ~2× throughput gain at minor accuracy
  *                             cost.  Mirrors [GpuDelegate.Options.setPrecisionLossAllowed].
  * @property cpuThreadCount    Number of threads for CPU XNNPACK execution.
- *                             Defaults to 4; set to [Runtime.getRuntime().availableProcessors()]
- *                             for maximum throughput on non-NPU paths.
+ *                             4 is a safe default; on SM8750 (8 Oryon cores) set to
+ *                             6 for better CPU throughput. Consider using
+ *                             [Runtime.getRuntime().availableProcessors()] minus 2 to
+ *                             avoid starving the UI thread.
  */
 data class DelegateConfig(
     val enableQnn: Boolean = true,

@@ -10,7 +10,9 @@ Last updated: 2025-04-28
 ## Project Purpose
 
 Reusable Android boilerplate for on-device AI inference using Google LiteRT.
-Primary target device: Samsung Galaxy S23 Ultra (Snapdragon SM8550 / Hexagon HTP v73).
+Primary target devices:
+- **Nothing Phone 3** — Snapdragon 8 Elite (SM8750) / Hexagon HTP v79 / Adreno 830 / 16 GB RAM
+- Samsung Galaxy S23 Ultra — Snapdragon 8 Gen 2 (SM8550) / Hexagon HTP v73 / Adreno 740
 
 Intended use: Fork this repo, replace `app/` UI, drop in your model, and ship. The inference
 infrastructure (delegate chain, model loading, benchmarking, LLM streaming) is already built.
@@ -69,6 +71,7 @@ It is the officially supported pipeline and produces QNN-compatible outputs.
 - Extended docs created (docs/DECISION-LOG.md, docs/QNN-SETUP.md, docs/BENCHMARKING.md, docs/FORK-QUICKSTART.md, docs/MODEL-FORMATS.md)
 - .gitignore configured for build artifacts, model weights, QNN binaries, IDE files, secrets
 - .gitkeep files placed to preserve empty directories (libs/qnn/arm64-v8a/, app/src/main/assets/models/)
+- Nothing Phone 3 (SM8750 / HTP v79) targeting added: updated QNN-SETUP.md with v79 file list and quick-start, updated DelegateType.kt/LiteRtDelegateProvider.kt/DelegateProvider.kt to document multi-device HTP version support, updated AppConfig.kt thread count guidance for SM8750 Oryon cores, added SM8750 benchmark table to BENCHMARKING.md, updated MODEL-FORMATS.md with 16 GB model sizing and image generation roadmap, added DECISION-LOG.md entry #10 for multi-device QNN targeting
 
 ---
 
@@ -109,13 +112,16 @@ _(none yet)_
 
 ### 1. QNN Binary Files
 **File:** `libs/qnn/arm64-v8a/`
-**What:** Six QNN shared library files required for NPU inference on SM8550.
+**What:** QNN shared library files required for NPU inference. Four shared files plus a
+device-specific stub/skel pair per supported Snapdragon generation.
 **Steps:**
 1. Download QAIRT SDK 2.44 from https://www.qualcomm.com/developer/software/qualcomm-ai-engine-direct-sdk
-2. Extract and locate: `libQnnHtp.so`, `libQnnHtpV73Stub.so`, `libQnnHtpV73Skel.so`, `libQnnHtpPrepare.so`, `libQnnSystem.so`, `libQnnTFLiteDelegate.so`
-3. Copy all six files to `libs/qnn/arm64-v8a/`
-4. Rebuild the project
-**Note:** Without these files, inference falls back to GPU → CPU. Build succeeds regardless.
+2. Copy shared files: `libQnnHtp.so`, `libQnnHtpPrepare.so`, `libQnnSystem.so`, `libQnnTFLiteDelegate.so`
+3. For Nothing Phone 3 (SM8750 / HTP v79): add `libQnnHtpV79Stub.so`, `libQnnHtpV79Skel.so`
+4. For Galaxy S23 Ultra (SM8550 / HTP v73): add `libQnnHtpV73Stub.so`, `libQnnHtpV73Skel.so`
+5. Copy all files to `libs/qnn/arm64-v8a/` and rebuild the project
+**Note:** Without the correct stub/skel pair for your target device, inference falls back to
+GPU → CPU. Build succeeds regardless.
 **Full guide:** See `docs/QNN-SETUP.md`
 
 ### 2. Classical ML Model

@@ -49,6 +49,10 @@ object AppConfig {
      * IMPORTANT: Models must be on the filesystem — not in APK assets.
      * The .litertlm format bundles the .tflite weights, tokenizer, and
      * chat template in a single file (2–8 GB).
+     *
+     * Nothing Phone 3 (SM8750, 16 GB RAM) can comfortably run 7B INT4
+     * models (~4 GB) and likely 13B INT4 models (~7 GB). Update this path
+     * to a larger model to take advantage of the extra RAM headroom.
      */
     const val LITERTLM_MODEL_PATH = "/data/local/tmp/models/model.litertlm"
 
@@ -69,8 +73,16 @@ object AppConfig {
 
     /**
      * Number of threads used by the CPU LiteRT interpreter.
-     * On SM8550 (8 cores: 1 prime + 3 performance + 4 efficiency),
-     * 4 threads typically gives the best CPU throughput without starving the UI.
+     *
+     * Tuning guide by device:
+     *  - SM8550 (Snapdragon 8 Gen 2, 8 cores: 1+3+4): 4 threads is optimal
+     *  - SM8650 (Snapdragon 8 Gen 3, 8 cores: 1+5+2): 5–6 threads
+     *  - SM8750 (Snapdragon 8 Elite / Nothing Phone 3, 8 Oryon cores): 6 threads
+     *
+     * The default of 4 is conservative and safe across all devices. Override in
+     * DelegateConfig.cpuThreadCount at runtime after detecting the device, or set
+     * it to (Runtime.getRuntime().availableProcessors() - 2) for a device-adaptive
+     * value that keeps at least two cores free for the UI thread.
      */
     const val INTERPRETER_NUM_THREADS = 4
 }

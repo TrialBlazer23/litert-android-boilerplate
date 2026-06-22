@@ -24,10 +24,19 @@ enum class DelegateType {
     /**
      * Qualcomm Hexagon NPU via the QNN HTP backend.
      *
-     * Requires [libQnnHtp.so], [libQnnHtpV73Stub.so], [libQnnSystem.so],
-     * [libQnnHtpPrepare.so], and [libQnnHtpV73Skel.so] to be present in
+     * Requires [libQnnHtp.so], [libQnnHtpPrepare.so], [libQnnSystem.so],
+     * [libQnnTFLiteDelegate.so], and a device-specific stub/skel pair in
      * [android.content.pm.ApplicationInfo.nativeLibraryDir] at runtime.
-     * Targets Hexagon HTP v73 on the SM8550 (Snapdragon 8 Gen 2).
+     *
+     * HTP version by Snapdragon generation:
+     *  - SM8550 (Snapdragon 8 Gen 2):            HTP v73 — libQnnHtpV73Stub.so / libQnnHtpV73Skel.so
+     *  - SM8650 (Snapdragon 8 Gen 3):            HTP v75 — libQnnHtpV75Stub.so / libQnnHtpV75Skel.so
+     *  - SM8750 (Snapdragon 8 Elite / NP3):      HTP v79 — libQnnHtpV79Stub.so / libQnnHtpV79Skel.so
+     *
+     * The QNN runtime selects the correct skel automatically when all supported
+     * stub/skel pairs are present in the native library directory. Drop multiple
+     * pairs into libs/qnn/arm64-v8a/ to support several Snapdragon generations
+     * from a single APK. See docs/QNN-SETUP.md for the full file list per device.
      */
     QNN_NPU,
 
@@ -37,6 +46,8 @@ enum class DelegateType {
      * Backed by OpenCL when available; falls back to OpenGL ES internally.
      * Requires the [com.google.ai.edge.litert:litert-gpu:1.2.0] artifact and
      * that [libvndksupport.so] / [libOpenCL.so] are declared in the manifest.
+     * Compatible with all Adreno generations (Adreno 740 on SM8550, Adreno 830
+     * on SM8750 / Nothing Phone 3, etc.).
      */
     GPU,
 

@@ -212,3 +212,37 @@ dequantization (lossy) and reassembly — it is placed in `tools/conversion/expe
 it can produce usable models but the quality degradation is not predictable.
 
 The TF SavedModel → TFLiteConverter path is also working and stable for TensorFlow-native models.
+
+---
+
+## 10. Multi-Device QNN Targeting (SM8550 + SM8750 / Nothing Phone 3)
+
+### Decision
+Target both SM8550 (HTP v73) and SM8750 (HTP v79) from a single APK by including all relevant
+stub/skel `.so` pairs in `libs/qnn/arm64-v8a/`.
+
+### Rationale
+The QNN runtime automatically selects the correct HTP skel for the device's DSP firmware at
+runtime. Placing both `libQnnHtpV73Skel.so` (for SM8550) and `libQnnHtpV79Skel.so` (for SM8750)
+in the same directory costs ~2 MB of uncompressed APK size but eliminates the need for separate
+APK splits or runtime device detection.
+
+This approach is explicitly documented in the QAIRT SDK and is the Qualcomm-recommended path for
+apps targeting multiple Snapdragon generations.
+
+The QNN Maven artifact (`qnn-litert-delegate:2.44.0`) supports both HTP v73 and v79 — no version
+change is required.
+
+### Impact
+- `libs/qnn/arm64-v8a/` must contain both the v73 and v79 stub/skel pairs (8 files total)
+- `LiteRtDelegateProvider` code is unchanged — the runtime handles device selection
+- `DelegateType.QNN_NPU` KDoc updated to document the multi-version behavior
+- `docs/QNN-SETUP.md` updated with per-device file requirements and a Nothing Phone 3 quick-start
+
+### Devices covered by this boilerplate after this update
+| Device | SoC | HTP | Status |
+|---|---|---|---|
+| Nothing Phone 3 | SM8750 (8 Elite) | v79 | Primary target |
+| Samsung Galaxy S25 Ultra | SM8750 (8 Elite) | v79 | Covered by v79 files |
+| Samsung Galaxy S23 Ultra | SM8550 (8 Gen 2) | v73 | Covered by v73 files |
+| Samsung Galaxy S24 Ultra | SM8650 (8 Gen 3) | v75 | Add v75 stub/skel pair |

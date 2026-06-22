@@ -26,8 +26,12 @@ private const val TAG = "LiteRtDelegateProvider"
  * Adreno GPU, and XNNPACK CPU.
  *
  * - **QNN NPU** — Uses [QnnDelegate] with HTP_BACKEND.  Requires QAIRT native
- *   libraries (libQnnHtp.so, libQnnHtpV73Stub.so, etc.) in [DelegateConfig.nativeLibraryDir].
+ *   libraries in [DelegateConfig.nativeLibraryDir].  The QNN runtime selects the
+ *   correct device-specific skel automatically (e.g. libQnnHtpV73Skel.so on SM8550,
+ *   libQnnHtpV79Skel.so on SM8750 / Nothing Phone 3) as long as all supported
+ *   stub/skel pairs are present. See docs/QNN-SETUP.md.
  * - **GPU** — Uses [GpuDelegate] with optional precision loss for throughput.
+ *   Works on all Adreno GPUs (Adreno 740 on SM8550, Adreno 830 on SM8750, etc.).
  *   Requires libOpenCL.so / libvndksupport.so declared in the manifest.
  * - **CPU** — No delegate object needed; the LiteRT runtime runs XNNPACK
  *   automatically on the CPU when no delegate is added.  A sentinel
@@ -71,8 +75,9 @@ class LiteRtDelegateProvider : DelegateProvider {
      * Attempts to create a [QnnDelegate] targeting the Hexagon HTP backend.
      *
      * [QnnDelegate.Options.setSkelLibraryDir] is mandatory: it tells the QNN
-     * runtime where to find libQnnHtpV73Skel.so, which is not on the standard
-     * JNI search path.
+     * runtime where to find the device-appropriate HTP skel library.  The
+     * runtime matches the skel version to the device's DSP firmware automatically
+     * (e.g. libQnnHtpV79Skel.so on SM8750 / Nothing Phone 3).
      *
      * @param config Delegate configuration containing nativeLibraryDir and
      *               the desired backend type string.
@@ -82,11 +87,11 @@ class LiteRtDelegateProvider : DelegateProvider {
         return try {
             val options = QnnDelegate.Options().apply {
                 // HTP_BACKEND routes execution to the Hexagon Neural Processing
-                // core (Hexagon HTP v73 on SM8550).
+                // core (v73 on SM8550, v75 on SM8650, v79 on SM8750 / Nothing Phone 3).
                 setBackendType(QnnDelegate.Options.BackendType.HTP_BACKEND)
 
-                // Without setSkelLibraryDir the HTP runtime cannot locate
-                // libQnnHtpV73Skel.so and will throw UnsatisfiedLinkError.
+                // Without setSkelLibraryDir the HTP runtime cannot locate the
+                // device-appropriate skel .so and will throw UnsatisfiedLinkError.
                 setSkelLibraryDir(config.nativeLibraryDir)
             }
             val delegate = QnnDelegate(options)
@@ -103,11 +108,12 @@ class LiteRtDelegateProvider : DelegateProvider {
     }
 
     /**
-     * Attempts to create a [GpuDelegate] for the Adreno 740 (SM8550).
+     * Attempts to create a [GpuDelegate] for the device's Adreno GPU.
      *
      * Precision loss is enabled when [DelegateConfig.gpuPrecisionLoss] is true,
      * which allows FP16 computation internally and significantly improves
-     * throughput at the cost of minor accuracy reduction.
+     * throughput at the cost of minor accuracy reduction. Compatible with all
+     * supported Adreno GPUs.
      *
      * @param config Delegate configuration.
      * @return A [DelegateCandidate] at priority 1, or null if creation fails.
