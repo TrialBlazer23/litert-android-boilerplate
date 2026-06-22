@@ -44,13 +44,8 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 
-    // Point at the shared version catalog so all modules can reference
-    // libs.xxx without re-declaring the catalog in each module.
-    versionCatalogs {
-        create("libs") {
-            from(files("gradle/libs.versions.toml"))
-        }
-    }
+    // gradle/libs.versions.toml is automatically discovered by Gradle 7.4+ as
+    // the `libs` version catalog — no explicit versionCatalogs block needed.
 }
 
 rootProject.name = "litert-boilerplate"

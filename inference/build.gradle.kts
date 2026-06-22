@@ -4,7 +4,7 @@
  * The :inference module provides classical on-device ML inference using the
  * LiteRT (formerly TensorFlow Lite) Interpreter API alongside the QNN
  * (Qualcomm Neural Networks) delegate for hardware-accelerated execution on
- * Snapdragon 8 Gen 2 (SM8550).
+ * Snapdragon devices (SM8550 / HTP v73, SM8750 / HTP v79, etc.).
  *
  * LiteRT version notes:
  *  • 1.4.0 is used for the core Interpreter track, not the 2.x CompiledModel
@@ -79,7 +79,7 @@ dependencies {
 
     // ── QNN delegate + runtime ────────────────────────────────────────────────
     // qnn-litert-delegate wires the LiteRT Interpreter to the Qualcomm AI
-    // Engine Direct (QNN) runtime for NPU execution on SM8550.
+    // Engine Direct (QNN) runtime for NPU execution on Snapdragon devices.
     // qnn-runtime contains the underlying QNN shared libraries.
     api(libs.qnn.litert.delegate)
     implementation(libs.qnn.runtime)
