@@ -3,7 +3,7 @@
 Living project memory. Every agent that completes significant work must update the relevant sections.
 Be specific — describe what was built, not just that "something was done."
 
-Last updated: 2025-04-28
+Last updated: 2026-06-23
 
 ---
 
@@ -31,10 +31,11 @@ Interpreter API and the LiteRT-LM API are fundamentally different (synchronous t
 streaming conversation). Keeping them in the same module would make the API surface confusing.
 See `docs/DECISION-LOG.md` for full rationale.
 
-### LiteRT Interpreter API version 1.4.0 (not CompiledModel 2.x)
+### LiteRT Interpreter API version 1.2.0 (not CompiledModel 2.x)
 The CompiledModel (LiteRT 2.x) API is newer but substantially less documented and has fewer
-community examples. The Interpreter API at 1.4.0 is stable, well-tested, and supports all three
-delegates (QNN, GPU, CPU). Revisit when LiteRT 2.x stabilizes. See `docs/DECISION-LOG.md`.
+community examples. The Interpreter API at 1.2.0 is stable, well-tested, and supports all three
+delegates (QNN, GPU, CPU). `litert:1.4.0` was never published to Google Maven — pinned to 1.2.0
+to align with litert-gpu and litert-support. Revisit when LiteRT 2.x stabilizes. See `docs/DECISION-LOG.md`.
 
 ### QNN delegate via Maven Central (qnn-litert-delegate:2.44.0)
 Using the Maven Central distribution of the QNN delegate rather than bundled `.so` files.
@@ -89,7 +90,26 @@ _(none identified at initial setup)_
 
 ## Known Issues Resolved
 
-_(none yet)_
+- **litert:1.4.0 does not exist on Google Maven** — was causing `Unresolved reference 'ai'` compile
+  error across the entire `com.google.ai.edge.litert.*` namespace. Fixed by pinning `litert = "1.2.0"`
+  in `gradle/libs.versions.toml`, aligning with litert-gpu and litert-support which were already at 1.2.0.
+
+- **Wrong QNN delegate package path** — `LiteRtDelegateProvider.kt` imported `com.qualcomm.qti.qnn.QnnDelegate`
+  (non-existent subpackage). Confirmed via AAR inspection that the correct class path is
+  `com.qualcomm.qti.QnnDelegate`. Fixed import.
+
+- **Kotlin 2.0.21 FirIncompatibleClassExpressionChecker crash** — `litertlm-android:latest.release`
+  (resolved to a 2026 build) was compiled for JVM 21, while all modules targeted JVM 17. The Kotlin
+  FIR compiler crashed with `IllegalArgumentException: source must not be null` at `LmConversation.kt:61`
+  instead of reporting a graceful incompatibility warning. Fixed by upgrading all three modules
+  (`inference/`, `inference-lm/`, `app/`) to `jvmTarget = "21"` / `JavaVersion.VERSION_21` and
+  updating CI to JDK 21.
+
+- **`com.google.ai.edge.litert.Interpreter` → `InterpreterApi`** — code used the concrete `Interpreter`
+  class and `Interpreter(modelBuffer, options)` constructor. Per AGENTS.md, the correct pattern is
+  `InterpreterApi.Options()`, `InterpreterApi.create(modelBuffer, options)`. All usages updated in
+  `InterpreterRunner.kt` and `LiteRtInferenceEngine.kt`. Input shape resize moved from inside
+  `Options.apply{}` (not an `Options` method) to an instance call after `create()`.
 
 ---
 

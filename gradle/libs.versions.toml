@@ -51,7 +51,7 @@ navigationCompose = "2.8.5"
 # ── LiteRT (Google AI Edge — 1.x Interpreter track) ─────────────────────────
 # The 1.x Interpreter API is the only documented path for using the QNN
 # delegate. The 2.x CompiledModel API does not yet support QNN delegation.
-litert        = "1.4.0"
+litert        = "1.2.0"
 litert-gpu    = "1.2.0"
 litertSupport = "1.2.0"
 

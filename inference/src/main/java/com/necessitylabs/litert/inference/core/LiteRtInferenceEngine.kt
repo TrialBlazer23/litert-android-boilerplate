@@ -7,7 +7,7 @@
  *  - Wraps every inference call with nanosecond-precision timing (via [InterpreterRunner])
  *  - Guards the interpreter with a [Mutex] for thread-safe concurrent callers
  *  - Always dispatches work to [Dispatchers.Default], never the main thread
- *  - Closes all delegates and the interpreter cleanly on [close]
+ *  - Closes all delegates and the [InterpreterApi] cleanly on [close]
  *
  * Heavy helpers ([buildInterpreter], [runInterpreterWithTiming]) live in
  * [InterpreterRunner.kt] to keep this file within the 300-line limit.
@@ -19,7 +19,7 @@
 package com.necessitylabs.litert.inference.core
 
 import android.util.Log
-import com.google.ai.edge.litert.Interpreter
+import com.google.ai.edge.litert.InterpreterApi
 import com.necessitylabs.litert.inference.benchmark.BenchmarkData
 import com.necessitylabs.litert.inference.benchmark.BenchmarkTracker
 import com.necessitylabs.litert.inference.delegate.DelegateCandidate
@@ -64,7 +64,7 @@ class LiteRtInferenceEngine(
     private val tracker   = BenchmarkTracker()
     private val mutex     = Mutex()
 
-    @Volatile private var interpreter: Interpreter? = null
+    @Volatile private var interpreter: InterpreterApi? = null
     @Volatile private var activeCandidates: List<DelegateCandidate> = emptyList()
     @Volatile private var isClosing: Boolean = false
 
@@ -75,7 +75,7 @@ class LiteRtInferenceEngine(
      * best available hardware delegate on [Dispatchers.Default].
      *
      * Delegates are tried in priority order (lowest integer first).  If a
-     * delegate throws during [Interpreter.allocateTensors], it is closed and
+     * delegate throws during [InterpreterApi.allocateTensors], it is closed and
      * the next candidate is attempted.  All delegate failures result in an
      * [IOException] from this function.
      *
@@ -95,7 +95,7 @@ class LiteRtInferenceEngine(
         val candidates = delegateProvider.createDelegates(config.delegateConfig)
         var lastError: Exception? = null
         var selectedCandidate: DelegateCandidate? = null
-        var newInterpreter: Interpreter? = null
+        var newInterpreter: InterpreterApi? = null
 
         for (candidate in candidates) {
             try {
@@ -220,7 +220,7 @@ class LiteRtInferenceEngine(
      *
      * @throws IllegalStateException If [isReady] is false or [interpreter] is null.
      */
-    private fun requireReadyInterpreter(): Interpreter {
+    private fun requireReadyInterpreter(): InterpreterApi {
         check(isReady) { "Engine is not ready. Call load() before run()." }
         return interpreter ?: error("Interpreter is null despite isReady=true")
     }

@@ -6,7 +6,7 @@
  * for the CPU tier to satisfy the [DelegateProvider] contract.
  *
  * [LiteRtInferenceEngine] checks for this type at load time and intentionally
- * skips adding it to [com.google.ai.edge.litert.Interpreter.Options], so the
+ * skips adding it to [com.google.ai.edge.litert.InterpreterApi.Options], so the
  * interpreter's built-in XNNPACK acceleration is used automatically.
  *
  * This class must never be added to Interpreter.Options — doing so would throw
@@ -34,7 +34,7 @@ class CpuSentinelDelegate : Delegate {
      * Returns 0 — this sentinel holds no native delegate handle.
      *
      * The LiteRT runtime must never receive this object via
-     * [com.google.ai.edge.litert.Interpreter.Options.addDelegate].
+     * [com.google.ai.edge.litert.InterpreterApi.Options.addDelegate].
      *
      * @return Always 0.
      */

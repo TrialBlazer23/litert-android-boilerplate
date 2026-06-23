@@ -4,7 +4,7 @@
  * Extracted from [LiteRtInferenceEngine] to keep that file within the 300-line
  * limit.  This file owns the two most verbose private operations:
  *
- *  - [buildInterpreter]: constructs an [Interpreter] from options and a candidate
+ *  - [buildInterpreter]: constructs an [InterpreterApi] from options and a candidate
  *  - [runInterpreterWithTiming]: executes a timed inference call and records metrics
  *
  * Neither function is part of the public API; they are internal to the
@@ -18,7 +18,7 @@ package com.necessitylabs.litert.inference.core
 
 import android.os.Debug
 import android.util.Log
-import com.google.ai.edge.litert.Interpreter
+import com.google.ai.edge.litert.InterpreterApi
 import com.necessitylabs.litert.inference.benchmark.BenchmarkTracker
 import com.necessitylabs.litert.inference.delegate.CpuSentinelDelegate
 import com.necessitylabs.litert.inference.delegate.DelegateCandidate
@@ -33,39 +33,39 @@ import java.nio.ByteBuffer
 private const val TAG = "InterpreterRunner"
 
 /**
- * Constructs an [Interpreter] configured for [candidate] without calling
- * [Interpreter.allocateTensors].  The caller is responsible for calling
+ * Constructs an [InterpreterApi] configured for [candidate] without calling
+ * [InterpreterApi.allocateTensors].  The caller is responsible for calling
  * [allocateTensors] and handling any exceptions before marking the session ready.
  *
  * Key behaviour: [CpuSentinelDelegate] is intentionally NOT added to
- * [Interpreter.Options] — XNNPACK is activated by the runtime automatically
+ * [InterpreterApi.Options] — XNNPACK is activated by the runtime automatically
  * when no other delegate is present.
  *
  * @param modelBuffer Memory-mapped `.tflite` file (position must be 0).
  * @param candidate   Delegate candidate whose type and [Delegate] object to use.
  * @param config      Source of thread count, XNNPACK flag, and input shape override.
- * @return Configured but not yet tensor-allocated [Interpreter].
+ * @return Configured but not yet tensor-allocated [InterpreterApi].
  */
 internal fun buildInterpreter(
     modelBuffer: ByteBuffer,
     candidate: DelegateCandidate,
     config: ModelConfig,
-): Interpreter {
-    val options = Interpreter.Options().apply {
+): InterpreterApi {
+    val options = InterpreterApi.Options().apply {
         setNumThreads(config.numThreads)
         setUseXNNPACK(config.useXnnpack)
-
-        // Resize input tensor 0 when an override shape is provided.
-        // Multi-input models that need per-tensor shape control should resize
-        // via the Interpreter after construction but before allocateTensors.
-        config.inputShape?.let { shape -> resizeInput(0, shape) }
 
         // CpuSentinelDelegate is a no-op token; adding it would crash the runtime.
         if (candidate.delegate !is CpuSentinelDelegate) {
             addDelegate(candidate.delegate)
         }
     }
-    return Interpreter(modelBuffer, options)
+    val interp = InterpreterApi.create(modelBuffer, options)
+    // Resize input tensor 0 after construction when an override shape is provided.
+    // Multi-input models that need per-tensor shape control can resize additional
+    // tensors via the interpreter before allocateTensors is called by the engine.
+    config.inputShape?.let { shape -> interp.resizeInput(0, shape) }
+    return interp
 }
 
 /**
@@ -75,7 +75,7 @@ internal fun buildInterpreter(
  * thread at a time calls into the native runtime.  The suspend point is
  * preserved — the [Mutex] is a coroutine-friendly lock, not a JVM monitor.
  *
- * @param interp          Live [Interpreter] to invoke.
+ * @param interp          Live [InterpreterApi] to invoke.
  * @param inputs          Input tensor index → data buffer/array.
  * @param outputs         Output tensor index → pre-allocated result buffer (modified in-place).
  * @param activeDelegate  The currently active [DelegateType], written into the result.
@@ -85,7 +85,7 @@ internal fun buildInterpreter(
  * @throws IOException If the runtime throws during [runForMultipleInputsOutputs].
  */
 internal suspend fun runInterpreterWithTiming(
-    interp: Interpreter,
+    interp: InterpreterApi,
     inputs: Map<Int, Any>,
     outputs: Map<Int, Any>,
     activeDelegate: DelegateType,
