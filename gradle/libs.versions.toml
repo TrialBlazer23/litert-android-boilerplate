@@ -19,11 +19,11 @@
 agp = "8.7.3"
 
 # Kotlin — also drives the Compose Compiler version (bundled since 2.0).
-kotlin = "2.3.20"
+kotlin = "2.0.21"
 
-# KSP2 — version 2.3.9 targets Kotlin 2.3.20 (buildKotlinVersion in ksp/gradle.properties).
-# KSP2 uses a standalone version scheme; no longer prefixed with the Kotlin version.
-ksp = "2.3.9"
+# KSP — must match the Kotlin version prefix exactly.
+# Format: <kotlin-version>-<ksp-incremental-version>
+ksp = "2.0.21-1.0.28"
 
 # ── Android SDK ──────────────────────────────────────────────────────────────
 compileSdk = "35"
