@@ -8,8 +8,13 @@ This file is the single source of truth for all development rules, API shapes, a
 ## Project Overview
 
 **litert-android-boilerplate** is a production-ready Android boilerplate for on-device AI inference
-using Google LiteRT. It is optimized for Samsung Galaxy S23 Ultra (Snapdragon SM8550 / Hexagon HTP v73)
-but is portable to any ARM64 Android device.
+using Google LiteRT. It targets Snapdragon-powered Android devices with Qualcomm Hexagon NPU
+acceleration. Primary tested targets are:
+- **Nothing Phone 3** — Snapdragon 8 Elite (SM8750) / Hexagon HTP v79 / Adreno 830 / 16 GB RAM
+- Samsung Galaxy S23 Ultra — Snapdragon 8 Gen 2 (SM8550) / Hexagon HTP v73 / Adreno 740
+
+The boilerplate is portable to any ARM64 Android device; NPU acceleration works on any Snapdragon
+device for which the correct HTP stub/skel `.so` pair is provided.
 
 Primary target: Android engineers who want to ship on-device AI features without building inference
 infrastructure from scratch. They fork this repo, replace the `app/` module UI, drop in their model,
@@ -270,13 +275,18 @@ android {
 
 ```
 libs/qnn/arm64-v8a/
-├── libQnnHtp.so
-├── libQnnHtpV73Stub.so    ← SM8550 / Snapdragon 8 Gen 2
-├── libQnnHtpV73Skel.so
-├── libQnnHtpPrepare.so
-├── libQnnSystem.so
-└── libQnnTFLiteDelegate.so
+├── libQnnHtp.so                ← shared (all Snapdragon devices)
+├── libQnnHtpPrepare.so         ← shared (all Snapdragon devices)
+├── libQnnSystem.so             ← shared (all Snapdragon devices)
+├── libQnnTFLiteDelegate.so     ← shared (all Snapdragon devices)
+├── libQnnHtpV79Stub.so         ← SM8750 / Nothing Phone 3 (Snapdragon 8 Elite)
+├── libQnnHtpV79Skel.so         ← SM8750 / Nothing Phone 3 (Snapdragon 8 Elite)
+├── libQnnHtpV73Stub.so         ← SM8550 / Galaxy S23 Ultra (Snapdragon 8 Gen 2)
+└── libQnnHtpV73Skel.so         ← SM8550 / Galaxy S23 Ultra (Snapdragon 8 Gen 2)
 ```
+
+Include all stub/skel pairs for every Snapdragon generation you want to support in the same APK.
+The QNN runtime automatically loads the correct skel for the device's DSP firmware.
 
 These files are not committed to git (`.gitignore` excludes `libs/qnn/`).
 The developer must obtain them from QAIRT SDK 2.44. See `docs/QNN-SETUP.md`.

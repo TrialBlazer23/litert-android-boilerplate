@@ -97,8 +97,8 @@ Last updated: 2025-04-28
 ### QNN Delegate
 - **Version:** 2.44.0
 - **Coordinate:** `com.qualcomm.qti:qnn-litert-delegate:2.44.0` (Maven Central)
-- **Why:** Enables Hexagon NPU inference on Snapdragon devices. Version 2.44.0 matches QAIRT SDK
-  2.44, which provides the HTP v73 `.so` files for SM8550 (Snapdragon 8 Gen 2).
+- **Why:** Enables Hexagon NPU inference on Snapdragon devices. Version 2.44.0 supports both
+  HTP v73 (SM8550 / Galaxy S23 series) and HTP v79 (SM8750 / Nothing Phone 3, Galaxy S25 series).
 - **Repository:** `mavenCentral()`
 
 ### QNN Runtime
@@ -107,13 +107,14 @@ Last updated: 2025-04-28
 - **Why:** Runtime support library required alongside the delegate. Must match the delegate version.
 
 ### QNN Native Libraries
-- **Files required (SM8550 / HTP v73):**
+- **Shared files (all Snapdragon targets):**
   - `libQnnHtp.so`
-  - `libQnnHtpV73Stub.so`
-  - `libQnnHtpV73Skel.so`
   - `libQnnHtpPrepare.so`
   - `libQnnSystem.so`
   - `libQnnTFLiteDelegate.so`
+- **Device-specific pairs (include all target generations):**
+  - HTP v79 (SM8750 / Nothing Phone 3): `libQnnHtpV79Stub.so`, `libQnnHtpV79Skel.so`
+  - HTP v73 (SM8550 / Galaxy S23 Ultra): `libQnnHtpV73Stub.so`, `libQnnHtpV73Skel.so`
 - **Source:** QAIRT SDK 2.44 — https://www.qualcomm.com/developer/software/qualcomm-ai-engine-direct-sdk
 - **Placement:** `libs/qnn/arm64-v8a/` (not committed to git)
 
