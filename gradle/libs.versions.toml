@@ -19,11 +19,11 @@
 agp = "8.7.3"
 
 # Kotlin — also drives the Compose Compiler version (bundled since 2.0).
-kotlin = "2.0.21"
+kotlin = "2.3.20"
 
-# KSP — must match the Kotlin version prefix exactly.
-# Format: <kotlin-version>-<ksp-incremental-version>
-ksp = "2.0.21-1.0.28"
+# KSP2 — version 2.3.9 targets Kotlin 2.3.20 (buildKotlinVersion in ksp/gradle.properties).
+# KSP2 uses a standalone version scheme; no longer prefixed with the Kotlin version.
+ksp = "2.3.9"
 
 # ── Android SDK ──────────────────────────────────────────────────────────────
 compileSdk = "35"
@@ -59,7 +59,7 @@ litertSupport = "1.2.0"
 # Published to Google Maven as com.google.ai.edge.litertlm:litertlm-android.
 # Pinned to latest.release at catalog authoring time; update via
 # `./gradlew dependencyUpdates` before each release.
-literlm = "0.10.1"
+literlm = "latest.release"
 
 # ── QNN (Qualcomm Neural Networks) ───────────────────────────────────────────
 # com.qualcomm.qti artifacts are published to Maven Central by Qualcomm.
