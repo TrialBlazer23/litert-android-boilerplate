@@ -45,12 +45,16 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = "21"
+        // litertlm-android:0.13.1 was compiled with Kotlin 2.3.0 metadata (version 2.3.0),
+        // but we build with Kotlin 2.0.21 which only understands metadata ≤ 2.0.0.
+        // Without this flag the FIR checker crashes with NPE instead of a clean error.
+        freeCompilerArgs += "-Xskip-metadata-version-check"
     }
 }
 

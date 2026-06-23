@@ -16,8 +16,8 @@
 package com.necessitylabs.litert.inference.delegate
 
 import android.util.Log
-import com.google.ai.edge.litert.gpu.GpuDelegate
-import com.qualcomm.qti.qnn.QnnDelegate
+import org.tensorflow.lite.gpu.GpuDelegate
+import com.qualcomm.qti.QnnDelegate
 
 private const val TAG = "LiteRtDelegateProvider"
 
@@ -35,7 +35,7 @@ private const val TAG = "LiteRtDelegateProvider"
  *   Requires libOpenCL.so / libvndksupport.so declared in the manifest.
  * - **CPU** — No delegate object needed; the LiteRT runtime runs XNNPACK
  *   automatically on the CPU when no delegate is added.  A sentinel
- *   [CpuSentinelDelegate] is used to fit the [DelegateCandidate] contract.
+ *   A [CpuSentinelDelegate] is used to fit the [DelegateCandidate] contract.
  *
  * Usage: instantiate once; [createDelegates] may be called multiple times
  * (e.g., after a previous load fails and the engine retries).
@@ -142,7 +142,7 @@ class LiteRtDelegateProvider : DelegateProvider {
      * [CpuSentinelDelegate] is a lightweight no-op that satisfies the
      * [DelegateCandidate.delegate] contract without touching the interpreter's
      * delegate chain — [LiteRtInferenceEngine] detects the sentinel type and
-     * skips adding it to [com.google.ai.edge.litert.Interpreter.Options].
+     * skips adding it to [com.google.ai.edge.litert.InterpreterApi.Options].
      *
      * @return [DelegateCandidate] at priority 2.
      */

@@ -15,7 +15,7 @@
 
 package com.necessitylabs.litert.inference.delegate
 
-import com.google.ai.edge.litert.Delegate
+import org.tensorflow.lite.Delegate
 
 /**
  * Factory interface for constructing [DelegateCandidate] lists.

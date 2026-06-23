@@ -7,7 +7,7 @@
  *  - Wraps every inference call with nanosecond-precision timing (via [InterpreterRunner])
  *  - Guards the interpreter with a [Mutex] for thread-safe concurrent callers
  *  - Always dispatches work to [Dispatchers.Default], never the main thread
- *  - Closes all delegates and the interpreter cleanly on [close]
+ *  - Closes all delegates and the [Interpreter] cleanly on [close]
  *
  * Heavy helpers ([buildInterpreter], [runInterpreterWithTiming]) live in
  * [InterpreterRunner.kt] to keep this file within the 300-line limit.
@@ -19,7 +19,7 @@
 package com.necessitylabs.litert.inference.core
 
 import android.util.Log
-import com.google.ai.edge.litert.Interpreter
+import org.tensorflow.lite.Interpreter
 import com.necessitylabs.litert.inference.benchmark.BenchmarkData
 import com.necessitylabs.litert.inference.benchmark.BenchmarkTracker
 import com.necessitylabs.litert.inference.delegate.DelegateCandidate
