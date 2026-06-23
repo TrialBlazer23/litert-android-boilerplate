@@ -16,7 +16,7 @@
 package com.necessitylabs.litert.inference.delegate
 
 import android.util.Log
-import com.google.ai.edge.litert.gpu.GpuDelegate
+import org.tensorflow.lite.gpu.GpuDelegate
 import com.qualcomm.qti.QnnDelegate
 
 private const val TAG = "LiteRtDelegateProvider"

@@ -59,7 +59,7 @@ litertSupport = "1.2.0"
 # Published to Google Maven as com.google.ai.edge.litertlm:litertlm-android.
 # Pinned to latest.release at catalog authoring time; update via
 # `./gradlew dependencyUpdates` before each release.
-literlm = "latest.release"
+literlm = "0.10.1"
 
 # ── QNN (Qualcomm Neural Networks) ───────────────────────────────────────────
 # com.qualcomm.qti artifacts are published to Maven Central by Qualcomm.

@@ -18,7 +18,7 @@ package com.necessitylabs.litert.inference.core
 
 import android.os.Debug
 import android.util.Log
-import com.google.ai.edge.litert.InterpreterApi
+import org.tensorflow.lite.Interpreter
 import com.necessitylabs.litert.inference.benchmark.BenchmarkTracker
 import com.necessitylabs.litert.inference.delegate.CpuSentinelDelegate
 import com.necessitylabs.litert.inference.delegate.DelegateCandidate
@@ -50,8 +50,8 @@ internal fun buildInterpreter(
     modelBuffer: ByteBuffer,
     candidate: DelegateCandidate,
     config: ModelConfig,
-): InterpreterApi {
-    val options = InterpreterApi.Options().apply {
+): Interpreter {
+    val options = Interpreter.Options().apply {
         setNumThreads(config.numThreads)
         setUseXNNPACK(config.useXnnpack)
 
@@ -60,7 +60,7 @@ internal fun buildInterpreter(
             addDelegate(candidate.delegate)
         }
     }
-    val interp = InterpreterApi.create(modelBuffer, options)
+    val interp = Interpreter(modelBuffer, options)
     // Resize input tensor 0 after construction when an override shape is provided.
     // Multi-input models that need per-tensor shape control can resize additional
     // tensors via the interpreter before allocateTensors is called by the engine.
@@ -85,7 +85,7 @@ internal fun buildInterpreter(
  * @throws IOException If the runtime throws during [runForMultipleInputsOutputs].
  */
 internal suspend fun runInterpreterWithTiming(
-    interp: InterpreterApi,
+    interp: Interpreter,
     inputs: Map<Int, Any>,
     outputs: Map<Int, Any>,
     activeDelegate: DelegateType,

@@ -18,7 +18,7 @@
 
 package com.necessitylabs.litert.inference.delegate
 
-import com.google.ai.edge.litert.Delegate
+import org.tensorflow.lite.Delegate
 
 /**
  * Sentinel implementation of [Delegate] representing the CPU/XNNPACK backend.
